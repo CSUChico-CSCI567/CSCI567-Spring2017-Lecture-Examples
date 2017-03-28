@@ -16,7 +16,7 @@ public class RecipeList {
 
     @SerializedName("recipes")
     @Expose
-    public List<Recipe> recipeItems;
+    public ArrayList<Recipe> recipeItems;
 
     public int getCount(){
         return count;
@@ -26,11 +26,11 @@ public class RecipeList {
         this.count=count;
     }
 
-    public List<Recipe> getRecipeItems(){
+    public ArrayList<Recipe> getRecipeItems(){
         return recipeItems;
     }
 
-    public void setRecipeItems(List<Recipe> recipeItems){
+    public void setRecipeItems(ArrayList<Recipe> recipeItems){
         this.recipeItems = recipeItems;
     }
 }

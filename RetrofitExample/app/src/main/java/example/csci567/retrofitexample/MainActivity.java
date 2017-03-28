@@ -1,9 +1,15 @@
 package example.csci567.retrofitexample;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import java.util.ArrayList;
+
+import example.csci567.retrofitexample.adapters.F2FListAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -14,10 +20,19 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Retrofit Example" ;
 
+    public static Context context;
+    private RecyclerView mRecyclerView;
+    private F2FListAdapter mListAdapter = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //context = this;
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(getAdapter());
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://food2fork.com/api/")
@@ -31,9 +46,10 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<RecipeList> call, Response<RecipeList> response) {
                 Log.d(TAG,response.toString());
                 // Get result Repo from response.body()
-                for(int i=0;i<response.body().getRecipeItems().size();i++){
-                    Log.d(TAG,response.body().getRecipeItems().get(i).getTitle());
-                }
+//                for(int i=0;i<response.body().getRecipeItems().size();i++){
+//                    Log.d(TAG,response.body().getRecipeItems().get(i).getTitle());
+//                }
+                addItemsToList(response.body().getRecipeItems());
             }
 
             @Override
@@ -43,4 +59,49 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+    private void addItemsToList(ArrayList<Recipe> data) {
+        if (data != null) {
+            if (!data.isEmpty()) {
+                if(mListAdapter==null || mListAdapter.getData().size()<=0) {
+                    try {
+                        mListAdapter.setData(data);
+                    }
+                    catch (Exception e){
+                        Log.e("RetroFitExample: ", e.toString());
+                    }
+                }
+                else{
+                    for(int i=0;i<data.size();i++) {
+                        mListAdapter.addData(data.get(i));
+                    }
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListAdapter.notifyDataSetChanged();
+                    }
+                });
+
+            }
+        }
+    }
+
+    private RecyclerView.Adapter getAdapter() {
+        if (mListAdapter == null) {
+            mListAdapter = new F2FListAdapter(this);
+            mListAdapter.setData(new ArrayList<Recipe>());
+            mListAdapter.setOnItemClickListener(
+                    new F2FListAdapter.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(final Recipe item) {
+                            Log.d(TAG, item.getTitle());
+
+                        }
+                    }
+            );
+        }
+        return mListAdapter;
+    }
+
 }
